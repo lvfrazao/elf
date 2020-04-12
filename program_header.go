@@ -60,6 +60,7 @@ type ProgramHeader64 struct {
 	PAlign      uint64   /* 0 and 1 specify no alignment. Otherwise should be power of 2 */
 	SegmentType string   /* Pretty name for the PType */
 	Flags       []string /* Flag friend names */
+	FileOffset  uint64   /* Offset of header in the file */
 }
 
 // FromBuffer given a sufficiently sized, filled, buffer initialize the attrs of the ProgramHeader64
