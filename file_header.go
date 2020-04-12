@@ -14,6 +14,18 @@ const (
 	bigEndian              /* Big endian */
 )
 
+// ClassMap Maps EICLASS to friendly name
+var ClassMap = map[uint8]string{
+	CLASS32BIT: "32 bit",
+	CLASS64BIT: "64 bit",
+}
+
+// DataMap Maps EIDATA to friendly name
+var DataMap = map[uint8]string{
+	litteEndian: "Little Endian",
+	bigEndian:   "Big Endian",
+}
+
 // OSABIEncode map of friendly string to OSABI
 var OSABIEncode = map[string]uint8{
 	"System V":                     0x00,
@@ -136,6 +148,8 @@ type FileHeader64 struct {
 	OSABI        string /* Friendly name of EI_OSABI */
 	Type         string /* Friendly name of E_type */
 	Machine      string /* Friendly name of E_machine */
+	Endian       string /* Friendly name of EI_data */
+	Arch         string /* Friendly name of EI_class */
 }
 
 // FileHeader32 32 bit ELF header
@@ -162,6 +176,8 @@ type FileHeader32 struct {
 	OSABI        string /* Friendly name of EI_OSABI */
 	Type         string /* Friendly name of E_type */
 	Machine      string /* Friendly name of E_machine */
+	Endian       string /* Friendly name of EI_data */
+	Arch         string /* Friendly name of EI_class */
 }
 
 // FromBuffer initializes the FileHeader64 given a buffer of the size of the
@@ -210,6 +226,8 @@ func (h *FileHeader64) FromBuffer(buf []byte) {
 	h.OSABI = OSABIDecode[h.EIOSABI]
 	h.Type = etypeDecode[h.EType]
 	h.Machine = emachineDecode[h.EMachine]
+	h.Endian = DataMap[h.EIDATA]
+	h.Arch = ClassMap[h.EICLASS]
 }
 
 // FromBuffer initializes the FileHeader32 given a buffer of the size of the
@@ -258,4 +276,6 @@ func (h *FileHeader32) FromBuffer(buf []byte) {
 	h.OSABI = OSABIDecode[h.EIOSABI]
 	h.Type = etypeDecode[h.EType]
 	h.Machine = emachineDecode[h.EMachine]
+	h.Endian = DataMap[h.EIDATA]
+	h.Arch = ClassMap[h.EICLASS]
 }
