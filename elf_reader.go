@@ -73,6 +73,7 @@ func (e *Reader64) readProgramHeader64(offset uint64) ProgramHeader64 {
 	checkedRead(e.filePtr, readBuf, int64(offset))
 
 	h.FromBuffer(readBuf, e.elfStruct.FileHeader.EIDATA)
+	h.FileOffset = offset
 	return h
 }
 
@@ -85,11 +86,10 @@ func (e *Reader64) readSectionHeaders64() []SectionHeader64 {
 
 	if e.elfStruct.FileHeader.EShnum != 0 {
 		nameDataOffset := sHead[e.elfStruct.FileHeader.EShstrndx].SHOffset
-		for _, section := range sHead {
-			section.SectionName = readStr(e.filePtr, int(nameDataOffset+uint64(section.SHName)))
+		for i, section := range sHead {
+			sHead[i].SectionName = readStr(e.filePtr, int(nameDataOffset+uint64(section.SHName)))
 		}
 	}
-
 	return sHead
 }
 
