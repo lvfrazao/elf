@@ -26,6 +26,16 @@ var DataMap = map[uint8]string{
 	bigEndian:   "Big Endian",
 }
 
+var typeDesc = map[string]string{
+	"ET_NONE":   "No file type",
+	"ET_REL":    "Relocatable file",
+	"ET_EXEC":   "Executable file",
+	"ET_DYN":    "Shared object file",
+	"ET_CORE":   "Core file",
+	"ET_LOPROC": "Processor specific file",
+	"ET_HIPROC": "Processor specific file",
+}
+
 // OSABIEncode map of friendly string to OSABI
 var OSABIEncode = map[string]uint8{
 	"System V":                     0x00,
@@ -147,6 +157,7 @@ type FileHeader64 struct {
 	EShstrndx    uint16 /* Index of section header table entry containing section names */
 	OSABI        string /* Friendly name of EI_OSABI */
 	Type         string /* Friendly name of E_type */
+	TypeDesc     string /* Description of E_type */
 	Machine      string /* Friendly name of E_machine */
 	Endian       string /* Friendly name of EI_data */
 	Arch         string /* Friendly name of EI_class */
@@ -175,6 +186,7 @@ type FileHeader32 struct {
 	EShstrndx    uint16 /* Index of section header table entry containing section names */
 	OSABI        string /* Friendly name of EI_OSABI */
 	Type         string /* Friendly name of E_type */
+	TypeDesc     string /* Description of E_type */
 	Machine      string /* Friendly name of E_machine */
 	Endian       string /* Friendly name of EI_data */
 	Arch         string /* Friendly name of EI_class */
@@ -225,6 +237,7 @@ func (h *FileHeader64) FromBuffer(buf []byte) {
 	}
 	h.OSABI = OSABIDecode[h.EIOSABI]
 	h.Type = etypeDecode[h.EType]
+	h.TypeDesc = typeDesc[h.Type]
 	h.Machine = emachineDecode[h.EMachine]
 	h.Endian = DataMap[h.EIDATA]
 	h.Arch = ClassMap[h.EICLASS]
@@ -275,6 +288,7 @@ func (h *FileHeader32) FromBuffer(buf []byte) {
 	}
 	h.OSABI = OSABIDecode[h.EIOSABI]
 	h.Type = etypeDecode[h.EType]
+	h.TypeDesc = typeDesc[h.Type]
 	h.Machine = emachineDecode[h.EMachine]
 	h.Endian = DataMap[h.EIDATA]
 	h.Arch = ClassMap[h.EICLASS]
