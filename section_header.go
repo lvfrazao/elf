@@ -120,6 +120,9 @@ func (h *SectionHeader64) FromBuffer(buf []byte, endianess uint8) {
 	h.SHAddrAlign = u64(buf, 0x30)
 	h.SHEntsize = u64(buf, 0x38)
 	h.HeaderType = SHTypeDecode[h.SHType]
+	if h.HeaderType == "" {
+		h.HeaderType = "SHT_UNKNOWN"
+	}
 	h.readFlags()
 }
 

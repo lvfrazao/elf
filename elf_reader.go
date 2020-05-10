@@ -22,7 +22,9 @@ func (e *Reader64) FromFile(string) ELF64 {
 	e.openFile()
 	e.elfStruct.FileHeader = e.readFileHead64()
 	e.elfStruct.ProgramHeaders = e.readProgramHeaders64()
-	e.elfStruct.SectionHeaders = e.readSectionHeaders64()
+	sheaders, sections := e.readSectionHeaders64()
+	e.elfStruct.SectionHeaders = sheaders
+	e.elfStruct.Sections = sections
 	return e.elfStruct
 }
 
@@ -77,11 +79,12 @@ func (e *Reader64) readProgramHeader64(offset uint64) ProgramHeader64 {
 	return h
 }
 
-func (e *Reader64) readSectionHeaders64() []SectionHeader64 {
+func (e *Reader64) readSectionHeaders64() ([]SectionHeader64, []Section) {
 	sHead := make([]SectionHeader64, int(e.elfStruct.FileHeader.EShnum))
+	sections := make([]Section, int(e.elfStruct.FileHeader.EShnum))
 	for i := 0; i < int(e.elfStruct.FileHeader.EShnum); i++ {
 		offset := e.elfStruct.FileHeader.EShoff + uint64(int(e.elfStruct.FileHeader.EShentsize)*i)
-		sHead[i] = e.readSectionHead64(offset)
+		sHead[i], sections[i] = e.readSectionHead64(offset)
 	}
 
 	if e.elfStruct.FileHeader.EShnum != 0 {
@@ -90,13 +93,16 @@ func (e *Reader64) readSectionHeaders64() []SectionHeader64 {
 			sHead[i].SectionName = readStr(e.filePtr, int(nameDataOffset+uint64(section.SHName)))
 		}
 	}
-	return sHead
+	return sHead, sections
 }
 
-func (e *Reader64) readSectionHead64(offset uint64) SectionHeader64 {
+func (e *Reader64) readSectionHead64(offset uint64) (SectionHeader64, Section) {
 	readBuf := make([]byte, e.elfStruct.FileHeader.EShentsize)
 	checkedRead(e.filePtr, readBuf, int64(offset))
 	var h SectionHeader64
 	h.FromBuffer(readBuf, e.elfStruct.FileHeader.EIDATA)
-	return h
+
+	dataBuf := make([]byte, h.SHSize)
+	checkedRead(e.filePtr, dataBuf, int64(h.SHOffset))
+	return h, Section{Data: dataBuf, startAddr: offset, archBits: int(e.elfStruct.FileHeader.EIDATA)}
 }
