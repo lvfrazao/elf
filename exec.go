@@ -1,6 +1,7 @@
 package elf
 
 import (
+	"fmt"
 	"os"
 	"syscall"
 	"unsafe"
@@ -10,7 +11,7 @@ const (
 	pageSize = 0x1000
 )
 
-func exec(code []byte) {
+func Exec(code []byte) {
 	codeAddr := &(code[0])
 	size := len(code)
 
@@ -32,9 +33,9 @@ func exec(code []byte) {
 func makeExecutable(arbCode *byte, baseSize int) int {
 	page := uintptr(unsafe.Pointer(arbCode)) & (^uintptr(0xFFF)) // The addr needs to be on a page boundary
 	size := getSize(baseSize)                                    // The size needs to be a multiple of the page size
-	if ((int(arbcode) + baseSize) > (int(page) + size)) {
+	if (int(arbcode) + baseSize) > (int(page) + size) {
 		size += pageSize
-	} 
+	}
 	prot := syscall.PROT_READ | syscall.PROT_EXEC | syscall.PROT_WRITE
 	_, _, err := syscall.Syscall(syscall.SYS_MPROTECT, page, size, uintptr(prot))
 	return int(err)
