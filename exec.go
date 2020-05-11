@@ -33,7 +33,7 @@ func Exec(code []byte) {
 func makeExecutable(arbCode *byte, baseSize int) int {
 	page := uintptr(unsafe.Pointer(arbCode)) & (^uintptr(0xFFF)) // The addr needs to be on a page boundary
 	size := getSize(baseSize)                                    // The size needs to be a multiple of the page size
-	if (int(arbcode) + baseSize) > (int(page) + size) {
+	if (uintptr(unsafe.Pointer(arbCode)) + uintptr(baseSize)) > (page + uintptr(size)) {
 		size += pageSize
 	}
 	prot := syscall.PROT_READ | syscall.PROT_EXEC | syscall.PROT_WRITE
