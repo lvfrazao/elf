@@ -61,6 +61,7 @@ type ProgramHeader64 struct {
 	SegmentType string   /* Pretty name for the PType */
 	Flags       []string /* Flag friend names */
 	FileOffset  uint64   /* Offset of header in the file */
+	Data        []byte   /* Actual data */
 }
 
 // FromBuffer given a sufficiently sized, filled, buffer initialize the attrs of the ProgramHeader64
@@ -77,6 +78,8 @@ func (h *ProgramHeader64) FromBuffer(buf []byte, endianess uint8) {
 	h.PMemsz = u64(buf, 0x28)
 	h.SegmentType = PTypeDecode[h.PType]
 	h.readFlags()
+	h.Data = make([]byte, len(buf))
+	copy(h.Data, buf)
 }
 
 func (h *ProgramHeader64) readFlags() {
